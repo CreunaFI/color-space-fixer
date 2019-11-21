@@ -1,5 +1,7 @@
 # Color Space Fixer
 
+![Packagist Version](https://img.shields.io/packagist/v/creuna-fi/color-space-fixer)
+
 Are your photos strangely faded after uploading? Do your image colors look different in every browser?
 
 This WordPress plugin will automatically convert images your upload in WordPress media gallery into standard sRGB color space. This makes sure your images will look consistant across all browsers and operating systems.
