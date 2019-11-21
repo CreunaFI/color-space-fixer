@@ -32,25 +32,69 @@ function csf_wp_handle_upload($array, $var)
         $path = $array['file'];
         $image = new Imagick($path);
         $colorspace = $image->getImageColorspace();
-        //$this->log(" Current colorspace: " . $colorspace);
+
+        $constants = csf_get_constants();
+
+        csf_debug('Colorspace: ' . $constants[$colorspace]);
+
         $profiles = $image->getImageProfiles('*', false);
         $has_ICC_profile = (array_search('icc', $profiles) !== false);
-        //$this->log(" Has ICC color profile: " . ($has_ICC_profile ? "YES" : "NO"));
-        if ($colorspace === Imagick::COLORSPACE_SRGB || !$has_ICC_profile) {
-            error_log('No profile or image is already sRGB');
-        } else {
-            //$this->log(" Converting to sRGB.");
-            $sRGB_icc = file_get_contents(__DIR__ . '/icc/sRGB_v4_ICC_preference.icc');
-            $image->profileImage('icc', $sRGB_icc);
-            $image->transformImageColorspace(Imagick::COLORSPACE_SRGB);
-            $image->writeImage($path);
+        $icc_description = $image->getImageProperty('icc:description');
+
+        csf_debug('icc profile: ' . $icc_description);
+
+        if (!$has_ICC_profile) {
+            error_log("No icc profile found, can't convert");
+            return $array;
         }
+
+        if (stripos($icc_description, 'srgb') !== false) {
+            error_log("Already a sRGB image, no need to convert");
+            return $array;
+        }
+
+        if ($colorspace !== Imagick::COLORSPACE_SRGB) {
+            csf_debug("Color space is not SRGB (eg. it's a CMYK image), converting...");
+        }
+
+        if ($colorspace === Imagick::COLORSPACE_SRGB && stripos($icc_description, 'srgb') === false) {
+            csf_debug("Color space is sRGB but ICC profile is not (eg. it's a Adobe RGB image), converting");
+        }
+
+        $sRGB_icc = file_get_contents(__DIR__ . '/icc/sRGB_v4_ICC_preference.icc');
+        $image->profileImage('icc', $sRGB_icc);
+        $image->transformImageColorspace(Imagick::COLORSPACE_SRGB);
+        $image->writeImage($path);
+
     } catch (Exception $e) {
         error_log('Whoops, failed to convert image color space');
     }
 
     return $array;
+}
+
+/**
+ * @return array|null
+ * @throws ReflectionException
+ */
+function csf_get_constants() {
+    $class = new ReflectionClass('Imagick');
+    $constants = $class->getConstants();
+
+    $constants = array_filter($constants, function ($constant) {
+        return stripos($constant, 'colorspace') !== false;
+    }, ARRAY_FILTER_USE_KEY);
+
+    $constants = array_flip($constants);
+    return $constants;
 };
+
+function csf_debug($message)
+{
+    if (defined('WP_DEBUG') && WP_DEBUG === true) {
+        error_log(print_r($message, true));
+    }
+}
 
 // add the filter
 add_filter('wp_handle_upload', 'csf_wp_handle_upload', 10, 2);
