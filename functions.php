@@ -24,7 +24,7 @@ function csf_wp_handle_upload($array, $var)
         return $array;
     }
 
-    if (if (extension_loaded('imagick') && !csf_lcms_enabled()) {
+    if (extension_loaded('imagick') && !csf_lcms_enabled()) {
         error_log("Whoops, imagick was not built with lcms support");
         return $array;
     }
