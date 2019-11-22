@@ -9,6 +9,7 @@ Version: 1.1.0
 Requires at least: 5.0
 Requires PHP: 7.0
 License: GPL v2 or later
+Text Domain: color-space-fixer
 */
 
 function csf_wp_handle_upload($array, $var)
@@ -20,6 +21,11 @@ function csf_wp_handle_upload($array, $var)
 
     if (!extension_loaded('imagick')) {
         error_log('Whoops, imagick is not loaded');
+        return $array;
+    }
+
+    if (if (extension_loaded('imagick') && !csf_lcms_enabled()) {
+        error_log("Whoops, imagick was not built with lcms support");
         return $array;
     }
 
@@ -96,5 +102,29 @@ function csf_debug($message)
     }
 }
 
+function csf_admin_notices() {
+    if (!extension_loaded('imagick')) {
+        echo '<div class="notice notice-warning"><p>';
+        echo __("Color Space Fixer is activated but it's not doing anything because ImageMagick PHP extension has not been loaded.", 'color-space-fixer');
+        echo '</p></div>';
+    }
+    if (extension_loaded('imagick') && !csf_lcms_enabled()) {
+        echo '<div class="notice notice-warning"><p>';
+        echo __("Color Space Fixer is activated but it's not doing anything because LCMS delegate for ImageMagick has not been installed.", 'color-space-fixer');
+        echo '</p></div>';
+    }
+}
+
+function csf_lcms_enabled() {
+    $imagick = new Imagick();
+    $options = $imagick->getConfigureOptions();
+    if (!empty($options['DELEGATES']) && stripos($options['DELEGATES'], 'lcms') !== false) {
+        return true;
+    }
+    return false;
+}
+
 // add the filter
 add_filter('wp_handle_upload', 'csf_wp_handle_upload', 10, 2);
+
+add_action('admin_notices', 'csf_admin_notices');
