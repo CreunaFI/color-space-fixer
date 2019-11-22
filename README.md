@@ -1,6 +1,6 @@
 # Color Space Fixer
 
-![Packagist Version](https://img.shields.io/packagist/v/creuna-fi/color-space-fixer)
+[![Packagist Version](https://img.shields.io/packagist/v/creuna-fi/color-space-fixer)](https://packagist.org/packages/creuna-fi/color-space-fixer)
 
 Are your photos strangely faded after uploading? Do your image colors look different in every browser?
 
