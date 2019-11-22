@@ -15,17 +15,17 @@ Text Domain: color-space-fixer
 function csf_wp_handle_upload($array, $var)
 {
     if ($array['type'] !== 'image/jpeg' && $array['type'] !== 'image/png') {
-        error_log('Not a JPEG or PNG file, skipping color space fixing');
+        error_log('Color Space Fixer: Not a JPEG or PNG file, skipping color space fixing');
         return $array;
     }
 
     if (!extension_loaded('imagick')) {
-        error_log('Whoops, imagick is not loaded');
+        error_log('Color Space Fixer: Whoops, imagick is not loaded');
         return $array;
     }
 
     if (extension_loaded('imagick') && !csf_lcms_enabled()) {
-        error_log("Whoops, imagick was not built with lcms support");
+        error_log('Color Space Fixer: Whoops, imagick was not built with lcms support');
         return $array;
     }
 
@@ -50,12 +50,12 @@ function csf_wp_handle_upload($array, $var)
         csf_debug('icc profile: ' . $icc_description);
 
         if (!$has_ICC_profile) {
-            error_log("No icc profile found, can't convert");
+            error_log("Color Space Fixer: No icc profile found, can't convert");
             return $array;
         }
 
         if (stripos($icc_description, 'srgb') !== false) {
-            error_log("Already a sRGB image, no need to convert");
+            error_log("Color Space Fixer: Already a sRGB image, no need to convert");
             return $array;
         }
 
@@ -73,7 +73,7 @@ function csf_wp_handle_upload($array, $var)
         $image->writeImage($path);
 
     } catch (Exception $e) {
-        error_log('Whoops, failed to convert image color space');
+        error_log('Color Space Fixer: Whoops, failed to convert image color space');
     }
 
     return $array;
