@@ -1,2 +1,5 @@
 title: "Color Space Fixer"
 remote_theme: pmarsceill/just-the-docs
+aux_links:
+  "GitHub":
+    - "https://github.com/CreunaFI/color-space-fixer"
