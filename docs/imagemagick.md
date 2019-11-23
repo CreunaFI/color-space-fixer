@@ -1,5 +1,6 @@
 ---
 nav_order: 2
+description: Color Space Fixer requires ImageMagick. Learn what it is and how to install it on your server.
 ---
 
 # ImageMagick
