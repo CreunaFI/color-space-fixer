@@ -1,3 +1,7 @@
+---
+nav_order: 1
+---
+
 # Color Space Fixer
 
 [![Packagist Version](https://img.shields.io/packagist/v/creuna-fi/color-space-fixer)](https://packagist.org/packages/creuna-fi/color-space-fixer)
