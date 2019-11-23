@@ -19,4 +19,4 @@ It can handle:
 
 * WordPress 5.0 or later
 * PHP 7.0 or later
-* ImageMagick, needs to be built with lcms delegate (check with `convert -list configure | grep 'lcms'`)
+* [ImageMagick](imagemagick.html), needs to be built with [lcms delegate](lcms.html)
