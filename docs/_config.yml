@@ -3,3 +3,9 @@ remote_theme: pmarsceill/just-the-docs
 aux_links:
   "GitHub":
     - "https://github.com/CreunaFI/color-space-fixer"
+defaults:
+  -
+    scope:
+      path: ""
+    values:
+      image: "https://avatars3.githubusercontent.com/u/42207914"
