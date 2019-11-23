@@ -1,5 +1,6 @@
 ---
 nav_order: 1
+title: Color Space Fixer WordPress plugin
 description: Color Space Fixer will automatically convert images you upload in WordPress media gallery into standard sRGB color space.
 ---
 
