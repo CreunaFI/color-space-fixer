@@ -15,4 +15,8 @@ It can handle:
 
 * WordPress 5.0 or later
 * PHP 7.0 or later
-* ImageMagick, needs to be built with lcms delegate (check with `convert -list configure | grep 'lcms'`)
+* [ImageMagick](https://creunafi.github.io/color-space-fixer/imagemagick.html), needs to be built with [lcms delegate](https://creunafi.github.io/color-space-fixer/lcms.html)
+
+## Documentation
+
+[Click here to read the documentation](https://creunafi.github.io/color-space-fixer)
