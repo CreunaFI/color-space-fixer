@@ -1,5 +1,6 @@
 ---
 nav_order: 3
+description: Color Space Fixer requires you to have ImageMagick built with LCMS support
 ---
 
 # LCMS
