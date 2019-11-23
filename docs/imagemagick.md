@@ -12,7 +12,7 @@ This means you will need to install ImageMagick and the [Imagick PHP extension](
 
 ## Installing ImageMagick on Ubuntu 18.04
 
-You can install ImageMagick on Ubuntu 18.04 with the command `sudo apt install imagemagick`. After the installation is complete, install the PHP extension with command `sudo apt install php-imagick`. After the installation is complete, you will need to restart your web server with the command sudo `service apache2 restart` or `sudo service php7.2-fpm restart`
+You can install ImageMagick on Ubuntu 18.04 with the command `sudo apt install imagemagick`. After the installation is complete, install the PHP extension with command `sudo apt install php-imagick`. After you have installed ImageMagick, you will need to restart your web server with the command sudo `service apache2 restart` or `sudo service php7.2-fpm restart`
 
 ## Installing ImageMagick on shared hosting
 
