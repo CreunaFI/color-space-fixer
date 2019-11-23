@@ -1,3 +1,7 @@
+---
+nav_order: 2
+---
+
 # ImageMagick
 
 WordPress has support for two image processing libraries, first of which is [GD](https://en.wikipedia.org/wiki/GD_Graphics_Library), short for Graphics Draw. It is pretty basic but is included in most PHP distributions. The other one is [ImageMagick](https://en.wikipedia.org/wiki/ImageMagick), sometimes referred to as Imagick. It is more advanced and supports more WordPress features, such as [PDF previews](https://make.wordpress.org/core/2016/11/15/enhanced-pdf-support-4-7/). However, it's not always installed in every Linux system.
