@@ -2,7 +2,7 @@
 
 /*
 Plugin name: Color Space Fixer
-Description: Convert Adobe RGB / CMYK images to sRGB on upload. Requires ImageMagick built with lcms2 delegate.
+Description: Convert Adobe RGB / CMYK images to sRGB on upload. Requires ImageMagick built with lcms delegate.
 Author: Johannes Siipola
 Author URI: https://www.creuna.com/fi/
 Version: 1.1.0
