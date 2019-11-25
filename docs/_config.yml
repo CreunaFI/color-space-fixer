@@ -8,4 +8,4 @@ defaults:
     scope:
       path: ""
     values:
-      image: "https://avatars3.githubusercontent.com/u/42207914"
+      image: "color-space-fixer.png"
