@@ -6,9 +6,7 @@ Description: Convert Adobe RGB / CMYK images to sRGB on upload. Requires ImageMa
 Author: Johannes Siipola
 Author URI: https://www.creuna.com/fi/
 Version: 1.1.0
-Requires at least: 5.0
-Requires PHP: 7.0
-License: GPL v2 or later
+License: GPL v3 or later
 Text Domain: color-space-fixer
 */
 
