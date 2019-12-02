@@ -11,6 +11,9 @@ Convert Adobe RGB / CMYK images to sRGB on upload. Requires ImageMagick built wi
 
 == Changelog ==
 
+= 1.2.1 =
+* Fix: Improve error messages
+
 = 1.2.0 =
 * Feature: Add plugin update checker
 * Fix: Use sRGBv2 profile instead of sRGBv4 because Firefox doesn't support sRGBv4
