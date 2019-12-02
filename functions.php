@@ -6,9 +6,7 @@ Description: Convert Adobe RGB / CMYK images to sRGB on upload. Requires ImageMa
 Author: Johannes Siipola
 Author URI: https://www.creuna.com/fi/
 Version: 1.1.0
-Requires at least: 5.0
-Requires PHP: 7.0
-License: GPL v2 or later
+License: GPL v3 or later
 Text Domain: color-space-fixer
 */
 
@@ -81,7 +79,7 @@ function csf_wp_handle_upload($array, $var)
             csf_debug("Color space is sRGB but ICC profile is not (eg. it's a Adobe RGB image), converting");
         }
 
-        $sRGB_icc = file_get_contents(__DIR__ . '/icc/sRGB_v4_ICC_preference.icc');
+        $sRGB_icc = file_get_contents(__DIR__ . '/icc/sRGB2014.icc');
         $image->profileImage('icc', $sRGB_icc);
         $image->transformImageColorspace(Imagick::COLORSPACE_SRGB);
         $image->writeImage($path);
