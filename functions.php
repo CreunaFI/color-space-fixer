@@ -12,6 +12,20 @@ License: GPL v2 or later
 Text Domain: color-space-fixer
 */
 
+//autoload dependencies
+$vendor_dir = __DIR__ . '/vendor/autoload.php';
+if (file_exists($vendor_dir)) {
+    require($vendor_dir);
+}
+
+$update_checker = Puc_v4_Factory::buildUpdateChecker(
+    'https://github.com/CreunaFI/color-space-fixer',
+    __FILE__,
+    'color-space-fixer'
+);
+
+$update_checker->getVcsApi()->enableReleaseAssets();
+
 function csf_wp_handle_upload($array, $var)
 {
     if ($array['type'] !== 'image/jpeg' && $array['type'] !== 'image/png') {

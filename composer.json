@@ -9,5 +9,7 @@
             "email": "johannes.siipola@creuna.fi"
         }
     ],
-    "require": {}
+    "require": {
+        "yahnis-elsts/plugin-update-checker": "^4.8"
+    }
 }
