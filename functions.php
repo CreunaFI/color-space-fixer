@@ -115,15 +115,17 @@ function csf_debug($message)
 }
 
 function csf_admin_notices() {
+    $message = null;
     if (!extension_loaded('imagick')) {
-        echo '<div class="notice notice-warning"><p>';
-        echo __("Color Space Fixer is activated but it's not doing anything because ImageMagick PHP extension has not been loaded.", 'color-space-fixer');
-        echo '</p></div>';
+        $message = __("Color Space Fixer is activated but it's not doing anything because ImageMagick PHP extension has not been loaded. <a href='%s' target='_blank'>How to fix</a>.", 'color-space-fixer');
+        $message = sprintf($message, 'https://creunafi.github.io/color-space-fixer/imagemagick.html');
     }
     if (extension_loaded('imagick') && !csf_lcms_enabled()) {
-        echo '<div class="notice notice-warning"><p>';
-        echo __("Color Space Fixer is activated but it's not doing anything because LCMS delegate for ImageMagick has not been installed.", 'color-space-fixer');
-        echo '</p></div>';
+        $message = __("Color Space Fixer is activated but it's not doing anything because LCMS delegate for ImageMagick has not been installed. <a href='%s' target='_blank'>How to fix</a>.", 'color-space-fixer');
+        $message = sprintf($message, 'https://creunafi.github.io/color-space-fixer/lcms.html');
+    }
+    if ($message) {
+        echo "<div class='notice notice-warning'><p>$message</p></div>";
     }
 }
 
