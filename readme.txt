@@ -11,6 +11,9 @@ Convert Adobe RGB / CMYK images to sRGB on upload. Requires ImageMagick built wi
 
 == Changelog ==
 
+= 1.2.2 =
+* Fix: Archive structure
+
 = 1.2.1 =
 * Fix: Improve error messages
 
