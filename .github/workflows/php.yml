@@ -18,6 +18,7 @@ jobs:
 
     - name: Release
       run: |
+        rm -fr .github .gitignore
         zip -r color-space-fixer.zip . -x *.git*
 
     - uses: actions/upload-artifact@master
