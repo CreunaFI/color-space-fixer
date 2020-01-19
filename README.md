@@ -17,6 +17,12 @@ It can handle:
 * PHP 7.0 or later
 * [ImageMagick](https://creunafi.github.io/color-space-fixer/imagemagick.html), needs to be built with [lcms delegate](https://creunafi.github.io/color-space-fixer/lcms.html)
 
+## Installation
+
+1. Download latest version from the [GitHub releases tab](https://github.com/CreunaFI/color-space-fixer/releases)
+2. Unzip the plugin into your `wp-content/plugins` directory or upload it through the WordPress admin panel
+3. Activate Color Space Fixer from your Plugins page
+
 ## Documentation
 
 [Click here to read the documentation](https://creunafi.github.io/color-space-fixer)
