@@ -64,7 +64,9 @@ function csf_wp_handle_upload($array, $var)
             return $array;
         }
 
-        if (stripos($icc_description, 'srgb') !== false) {
+        // c2 is the Facebook's tiny sRGB profile https://pippin.gimp.org/sRGBz/ , used by Facebook and some CDNs too
+        // eg. Fastly
+        if (stripos($icc_description, 'srgb') !== false || $icc_description === 'c2') {
             error_log("Color Space Fixer: Already a sRGB image, no need to convert");
             return $array;
         }
