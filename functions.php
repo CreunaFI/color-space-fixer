@@ -51,9 +51,7 @@ function csf_wp_handle_upload($array, $var)
         $image = new Imagick($path);
         $colorspace = $image->getImageColorspace();
 
-        $constants = csf_get_constants();
-
-        csf_debug('Colorspace: ' . $constants[$colorspace]);
+        csf_debug('Colorspace: ' . csf_get_colorspace_name($colorspace));
 
         $profiles = $image->getImageProfiles('*', false);
         $has_ICC_profile = (array_search('icc', $profiles) !== false);
@@ -138,7 +136,11 @@ function csf_lcms_enabled() {
     return false;
 }
 
-// add the filter
+function csf_get_colorspace_name($colorspace) {
+    $constants = csf_get_constants();
+    return $constants[$colorspace];
+}
+
 add_filter('wp_handle_upload', 'csf_wp_handle_upload', 10, 2);
 
 add_action('admin_notices', 'csf_admin_notices');
