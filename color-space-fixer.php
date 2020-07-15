@@ -250,6 +250,16 @@ function csf_admin_enqueue_scripts()
         [],
         WP_DEBUG ? md5_file($path . 'dist/style.css') : $version
     );
+
+    $strings = [
+        'plugin_name' => __('Color Space Fixer', 'csf'),
+        'options' => __('Options', 'csf'),
+        'batch_process_images' => __('Batch process images', 'csf'),
+        'scan_for_images' => __('Scan for images', 'csf'),
+        'batch_process_description' => __('This tool will scan your WordPress media library for images not in sRGB color space.', 'csf'),
+        'save' => __('Save', 'csf'),
+    ];
+    wp_localize_script('csf-script', 'csf_translations', $strings);
 }
 
 add_filter('admin_enqueue_scripts', 'csf_admin_enqueue_scripts');
