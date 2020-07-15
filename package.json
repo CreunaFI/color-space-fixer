@@ -28,6 +28,7 @@
     "vue": "^2.6.11",
     "vue-loader": "^15.9.2",
     "vue-template-compiler": "^2.6.11",
+    "vue-toasted": "^1.1.28",
     "webpack": "^4.41.5"
   },
   "devDependencies": {

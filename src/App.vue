@@ -15,27 +15,40 @@
         <div class="scf__content">
             <div v-if="currentTab === 'settings'">
                 <h2 class="scf__content-header">{{translations.options}}</h2>
-                <div class="scf__content-text">{{translations.batch_process_description}}</div>
+                <div class="scf__checkbox">
+                    <label class="scf-custom-checkbox">
+                        <input type="checkbox">
+                        <span class="scf-custom-checkbox-indicator"></span>
+                        Process images on upload
+                    </label>
 
-                <button class="scf__content-button">{{translations.save}}</button>
+                </div>
+
+                <button class="scf__content-button"
+                        v-on:click="save"
+                >
+                    {{translations.save}}
+                </button>
             </div>
-            <div v-if="currentTab === 'batch'">
-                <h2 class="scf__content-header">{{translations.batch_process_images}}</h2>
-
-                <div class="scf__content-text">{{translations.batch_process_description}}</div>
-
-                <button class="scf__content-button">{{translations.scan_for_images}}</button>
-            </div>
+            <Batch v-if="currentTab === 'batch'">
+            </Batch>
         </div>
     </div>
 </template>
 
 <script>
+    import Batch from "./Batch";
     export default {
+        components: {Batch},
         data: function () {
             return {
                 currentTab: 'settings',
                 translations: window.csf_translations,
+            }
+        },
+        methods: {
+            save: function () {
+                this.$toasted.show(this.translations.options_saved);
             }
         }
     }
