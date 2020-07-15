@@ -229,3 +229,43 @@ function csf_check_color_space($image) {
     }
     return false;
 }
+
+function csf_admin_enqueue_scripts()
+{
+    $plugin_data = get_plugin_data(__FILE__);
+    $version = $plugin_data['Version'];
+    $url = plugin_dir_url(__FILE__);
+    $path = plugin_dir_path(__FILE__);
+
+    wp_enqueue_script(
+        'csf-script',
+        "{$url}dist/script.js",
+        [],
+        WP_DEBUG ? md5_file($path . 'dist/script.js') : $version
+    );
+
+    wp_enqueue_style(
+        'csf-style',
+        "{$url}dist/style.css",
+        [],
+        WP_DEBUG ? md5_file($path . 'dist/style.css') : $version
+    );
+}
+
+add_filter('admin_enqueue_scripts', 'csf_admin_enqueue_scripts');
+
+function csf_admin_menu() {
+    add_options_page(
+        __( 'Color Space Fixer', 'csf' ),
+        __( 'Color Space Fixer', 'csf' ),
+        'manage_options',
+        'color-space-fixer',
+        'csf_render_menu'
+    );
+}
+
+add_action( 'admin_menu', 'csf_admin_menu' );
+
+function csf_render_menu() {
+    echo '<div id="color-space-fixer"><color-space-fixer></color-space-fixer></div>';
+}

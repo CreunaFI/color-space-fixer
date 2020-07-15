@@ -32,8 +32,12 @@ It can handle:
 
 ### I have existing photos on my site, can I convert them to sRGB?
 
-No. The color space conversion on done on upload. Possibility to batch convert existing images will be added in future.
+Yes. This feature has been added in version 2.0 of the plugin.
 
 ### I use Photoshop's save for web when exporting images, do I need this plugin?
 
 That's great! You probably don't need this plugin. However, in many cases there are more than one people who administer a WordPress site. Instead of teaching all of them about color spaces and exporting, it might be easier to automate the process using a plugin
+
+### Why sRGBv2 instead of sRGBv4
+
+Compatibility. As of 2020, sRGBv4 is not supported in Firefox unless you manually enable it in `about:config`.

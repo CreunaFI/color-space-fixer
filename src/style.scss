@@ -1,0 +1,106 @@
+$color-blue: #1976d2;
+
+@mixin reset-button {
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+  -webkit-appearance: none;
+}
+
+@mixin reset-heading {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+  font-size: 13px;
+}
+
+.js-focus-visible :focus:not(.focus-visible) {
+  outline: none;
+}
+
+.settings_page_color-space-fixer #wpcontent,
+.settings_page_color-space-fixer.auto-fold #wpcontent {
+  padding-left: 0;
+}
+
+.settings_page_color-space-fixer .notice {
+  margin: 5px 20px 15px 22px;
+}
+
+.settings_page_color-space-fixer .update-nag {
+  margin-bottom: 20px;
+  margin-left: 22px;
+}
+
+.csf {
+
+}
+
+.csf__header {
+  background-color: white;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  box-shadow: inset rgba(0, 0, 0, 0.15) 0px -1px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.csf__header-icon {
+  display: block;
+  height: 22px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.csf__header-title {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.csf__header-button {
+  @include reset-button;
+  padding-left: 20px;
+  padding-right: 20px;
+  height: 42px;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+}
+
+.csf__header-button--active {
+  border-bottom: 3px solid $color-blue;
+  font-weight: bold;
+}
+
+.scf__content {
+  padding: 40px;
+}
+
+.scf__content-header {
+  @include reset-heading;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.scf__content-text {
+  margin-bottom: 20px;
+}
+
+.scf__content-button {
+  @include reset-button;
+  background-color: $color-blue;
+  color: white;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-radius: 3px;
+}
