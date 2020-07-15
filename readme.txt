@@ -11,6 +11,9 @@ Convert Adobe RGB / CMYK images to sRGB on upload. Requires ImageMagick built wi
 
 == Changelog ==
 
+= 2.0.0 =
+* Renamed plugin main file name, please re-activate plugin after updating
+
 = 1.3.0 =
 * Feature: Support for Facebook's tiny sRGB profile
 
