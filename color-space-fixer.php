@@ -135,6 +135,56 @@ function csf_get_colorspace_name($colorspace) {
     return $constants[$colorspace];
 }
 
+function csf_ajax_get_images()
+{
+    $query = new WP_Query([
+        'post_type' => 'attachment',
+        'post_status' => 'inherit',
+        'post_mime_type' => ['image/jpeg', 'image/png'],
+        'posts_per_page' => -1,
+    ]);
+
+    $posts = [];
+
+    foreach ($query->posts as $post) {
+        $new_post = [];
+        $new_post['id'] = $post->ID;
+        $new_post['title'] = get_the_title($post);
+        $new_post['thumbnail'] = null;
+        $new_post['link'] = get_edit_post_link($post->ID, false);
+        $thumbnail = wp_get_attachment_image_src($post->ID, 'medium');
+        if ($thumbnail) {
+            $new_post['thumbnail'] = $thumbnail[0];
+        }
+
+        array_push($posts, $new_post);
+    }
+
+    $json = [
+      'posts' => $posts,
+      'total' => $query->post_count,
+    ];
+
+    wp_send_json($json);
+}
+
+add_action( 'admin_footer', 'csf_add_js' );
+
+function csf_add_js() { ?>
+    <script type="text/javascript" >
+        jQuery(document).ready(function($) {
+
+            var data = {
+                'action': 'csf_get_images',
+            };
+            
+            jQuery.post(ajaxurl, data, function(response) {
+                console.log(response);
+            });
+        });
+    </script> <?php
+}
+
 add_filter('wp_handle_upload', 'csf_wp_handle_upload', 10, 2);
 
 add_action('admin_notices', 'csf_admin_notices');
