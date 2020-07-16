@@ -17,13 +17,29 @@ if (file_exists($vendor_dir)) {
 }
 
 class ColorSpaceFixer {
+    /**
+     * @var array
+     */
+    private $options;
+
     public function __construct()
     {
         $this->set_up_updater();
+
+        $default_options = [
+            'process_on_upload' => true,
+        ];
+
+        $db_options = get_option('csf_options') ?: [];
+
+        $this->options = array_merge($default_options, $db_options);
+
         add_filter('wp_handle_upload', [$this, 'wp_handle_upload'], 10, 2);
         add_action('admin_notices', [$this, 'admin_notices']);
         add_action('wp_ajax_csf_scan_images', [$this, 'ajax_scan_images']);
         add_action('wp_ajax_csf_get_image', [$this, 'ajax_get_image']);
+        add_action('wp_ajax_csf_save_options', [$this, 'ajax_save_options']);
+        add_action('wp_ajax_csf_get_options', [$this, 'ajax_get_options']);
         add_filter('admin_enqueue_scripts', [$this, 'admin_enqueue_scripts']);
         add_action( 'admin_menu', [$this, 'csf_admin_menu']);
 
@@ -65,6 +81,11 @@ class ColorSpaceFixer {
 
     public function wp_handle_upload($array, $var)
     {
+        if ($this->options['process_on_upload'] === false) {
+            self::debug('Process on upload turned off, skipping color space fixing');
+            return $array;
+        }
+
         if ($array['type'] !== 'image/jpeg' && $array['type'] !== 'image/png') {
             error_log('Color Space Fixer: Not a JPEG or PNG file, skipping color space fixing');
             return $array;
@@ -84,7 +105,7 @@ class ColorSpaceFixer {
             $path = $array['file'];
             $image = new Imagick($path);
 
-            $result = csf_check_color_space($image);
+            $result = $this->check_color_space($image);
 
             if (!$result) {
                 return $array;
@@ -179,6 +200,22 @@ class ColorSpaceFixer {
         ];
 
         wp_send_json($json);
+    }
+
+    function ajax_get_options() {
+        wp_send_json($this->options);
+    }
+
+    function ajax_save_options() {
+        $options = $_POST['csf_options'];
+
+        // 10 years and counting. Don't hold your breath. https://core.trac.wordpress.org/ticket/18322
+        $options = stripslashes_deep($options);
+
+        $options = json_decode($options, true);
+
+        // TODO: maybe validate data somehow?
+        update_option('csf_options', $options);
     }
 
     function ajax_get_image() {
