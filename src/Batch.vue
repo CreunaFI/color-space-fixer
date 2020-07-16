@@ -64,6 +64,17 @@
                             this.currentId = this.ids[this.currentIndex];
                             this.getImage(this.currentId);
                         }
+                    }).catch((error) => {
+                        console.error(error)
+                        this.$toasted.show(this.translations.error, {
+                            duration: null,
+                            action : {
+                                text : this.translations.ok,
+                                onClick : (e, toastObject) => {
+                                    toastObject.goAway(0);
+                                }
+                            },
+                        });
                     })
             },
             getImage(id) {
