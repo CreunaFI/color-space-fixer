@@ -153,3 +153,15 @@ $color-blue: #1976d2;
 }
 
 // Checkbox end
+
+.scf__progress-bar {
+  height: 3px;
+  background-color: #D8D8D8;
+  margin-bottom: 20px;
+}
+
+.scf__progress-bar-progress {
+  background-color: $color-blue;
+  height: 3px;
+  transition: 100ms linear width;
+}

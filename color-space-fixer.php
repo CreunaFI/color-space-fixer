@@ -7,7 +7,7 @@ Author: Johannes Siipola
 Author URI: https://www.creuna.com/fi/
 Version: 1.3.0
 License: GPL v3 or later
-Text Domain: color-space-fixer
+Text Domain: csf
 */
 
 //autoload dependencies
@@ -135,61 +135,73 @@ function csf_get_colorspace_name($colorspace) {
     return $constants[$colorspace];
 }
 
-function csf_ajax_get_images()
+function csf_ajax_scan_images()
 {
     $query = new WP_Query([
         'post_type' => 'attachment',
         'post_status' => 'inherit',
+        'fields' => 'ids',
         'post_mime_type' => ['image/jpeg', 'image/png'],
         'posts_per_page' => -1,
     ]);
 
-    $posts = [];
-
-    foreach ($query->posts as $post) {
-        $new_post = [];
-        $new_post['id'] = $post->ID;
-        $new_post['title'] = get_the_title($post);
-        $new_post['thumbnail'] = null;
-        $new_post['link'] = get_edit_post_link($post->ID, false);
-        $thumbnail = wp_get_attachment_image_src($post->ID, 'medium');
-        if ($thumbnail) {
-            $new_post['thumbnail'] = $thumbnail[0];
-        }
-
-        array_push($posts, $new_post);
-    }
-
     $json = [
-      'posts' => $posts,
+      'posts' => $query->posts,
       'total' => $query->post_count,
     ];
 
     wp_send_json($json);
 }
 
-add_action( 'admin_footer', 'csf_add_js' );
+function csf_ajax_get_image() {
 
-function csf_add_js() { ?>
-    <script type="text/javascript" >
-        jQuery(document).ready(function($) {
+    $post_id = intval($_POST['csf_post_id']);
 
-            var data = {
-                'action': 'csf_get_images',
-            };
-            
-            jQuery.post(ajaxurl, data, function(response) {
-                console.log(response);
-            });
-        });
-    </script> <?php
+    $post = get_post($post_id);
+
+    if (!$post) {
+        wp_send_json([
+            'success' => false,
+            'post' => null,
+        ]);
+    }
+
+    $path = get_attached_file($post_id);
+
+    if (function_exists('wp_get_original_image_path')) {
+        $original = wp_get_original_image_path($post_id);
+        if ($original) {
+            $path = $original;
+        }
+    }
+
+    $image = new Imagick($path);
+
+    $fix = csf_check_color_space($image);
+
+    $new_post = [];
+    $new_post['id'] = $post->ID;
+    $new_post['title'] = get_the_title($post);
+    $new_post['thumbnail'] = null;
+    $new_post['link'] = get_edit_post_link($post->ID, false);
+    $thumbnail = wp_get_attachment_image_src($post->ID, 'medium');
+    if ($thumbnail) {
+        $new_post['thumbnail'] = $thumbnail[0];
+    }
+
+    wp_send_json([
+        'success' => true,
+        'fix' => $fix,
+        'post' => $new_post
+    ]);
 }
 
 add_filter('wp_handle_upload', 'csf_wp_handle_upload', 10, 2);
 
 add_action('admin_notices', 'csf_admin_notices');
 
-add_action('wp_ajax_csf_get_images', 'csf_ajax_get_images');
+add_action('wp_ajax_csf_scan_images', 'csf_ajax_scan_images');
+add_action('wp_ajax_csf_get_image', 'csf_ajax_get_image');
 
 /**
  * Check if color space should be converted, return true if should be converted, false if not
@@ -259,6 +271,13 @@ function csf_admin_enqueue_scripts()
         'batch_process_description' => __('This tool will scan your WordPress media library for images not in sRGB color space.', 'csf'),
         'save' => __('Save', 'csf'),
         'options_saved' => __('Options have been saved', 'csf'),
+        'scanning_in_progress' => __('Scanning media library...', 'csf'),
+        'scan_progress' => __('%d%% complete. Scanned %d image of %d', 'csf'),
+        'scan_progress_plural' => __('%d%% complete. Scanned %d images of %d', 'csf'),
+        'scan_complete' => __('Scan complete', 'csf'),
+        'scan_results' => __('Found %d image that need fixing.', 'csf'),
+        'scan_results_plural' => __('Found %d images that need fixing.', 'csf'),
+        'fix_images' => __('Fix images', 'csf'),
     ];
     wp_localize_script('csf-script', 'csf_translations', $strings);
 }
