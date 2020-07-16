@@ -2,7 +2,7 @@
     "name": "creuna-fi/color-space-fixer",
     "description": "Convert Adobe RGB / CMYK images to sRGB on upload. Requires ImageMagick built with lcms2 delegate.",
     "type": "wordpress-plugin",
-    "license": "GPL-3.0-or-later",
+    "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "Johannes Siipola",
