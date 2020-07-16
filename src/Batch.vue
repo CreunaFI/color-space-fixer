@@ -84,13 +84,14 @@
                 };
 
                 axios.post(ajaxurl, qs.stringify(data)).then(response => {
-                    this.processed = this.processed + 1;
-                    let newIndex = this.currentIndex + 1;
-
                     if (response.data.success && response.data.fix) {
                         this.postsToFix.push(response.data.post)
                     }
-
+                }).catch(response => {
+                    // TODO: handle error?
+                }).finally(() => {
+                    this.processed = this.processed + 1;
+                    let newIndex = this.currentIndex + 1;
                     if (this.ids[newIndex]) {
                         this.currentIndex = newIndex;
                         this.getImage(this.ids[newIndex]);
@@ -98,9 +99,7 @@
                         this.scanning = false;
                         this.scanComplete = true;
                     }
-                }).catch(response => {
-
-                })
+                });
             }
         },
         computed: {
@@ -114,8 +113,8 @@
             },
             scanResultsText: function () {
                 return this.postsToFix.length === 1 ?
-                    sprintf(this.translations.scan_results, this.postsToFix.length) :
-                    sprintf(this.translations.scan_results_plural, this.postsToFix.length);
+                    sprintf(this.translations.scan_results, this.total, this.postsToFix.length) :
+                    sprintf(this.translations.scan_results_plural, this.total, this.postsToFix.length);
             },
         }
     }

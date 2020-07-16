@@ -107,7 +107,7 @@ class ColorSpaceFixer {
 
             $result = $this->check_color_space($image);
 
-            if (!$result) {
+            if (!$result['convert']) {
                 return $array;
             }
 
@@ -242,13 +242,15 @@ class ColorSpaceFixer {
 
         $image = new Imagick($path);
 
-        $fix = $this->check_color_space($image);
+        $color_space_data = $this->check_color_space($image);
 
         $new_post = [];
         $new_post['id'] = $post->ID;
         $new_post['title'] = get_the_title($post);
         $new_post['thumbnail'] = null;
         $new_post['link'] = get_edit_post_link($post->ID, false);
+        $new_post['icc'] = $color_space_data['icc'];
+        $new_post['colorspace'] = $color_space_data['colorspace'];
         $thumbnail = wp_get_attachment_image_src($post->ID, 'medium');
         if ($thumbnail) {
             $new_post['thumbnail'] = $thumbnail[0];
@@ -256,7 +258,7 @@ class ColorSpaceFixer {
 
         wp_send_json([
             'success' => true,
-            'fix' => $fix,
+            'fix' => $color_space_data['convert'],
             'post' => $new_post
         ]);
     }
@@ -287,15 +289,15 @@ class ColorSpaceFixer {
             'options' => __('Options', 'csf'),
             'batch_process_images' => __('Batch process images', 'csf'),
             'scan_for_images' => __('Scan for images', 'csf'),
-            'batch_process_description' => __('This tool will scan your WordPress media library for images not in sRGB color space.', 'csf'),
+            'batch_process_description' => __('This tool will scan your WordPress media library for images not in sRGB color space and let you convert them to sRGB.', 'csf'),
             'save' => __('Save', 'csf'),
             'options_saved' => __('Options have been saved', 'csf'),
             'scanning_in_progress' => __('Scanning media library...', 'csf'),
             'scan_progress' => __('%d%% complete. Scanned %d image of %d', 'csf'),
             'scan_progress_plural' => __('%d%% complete. Scanned %d images of %d', 'csf'),
             'scan_complete' => __('Scan complete', 'csf'),
-            'scan_results' => __('Found %d image that need fixing.', 'csf'),
-            'scan_results_plural' => __('Found %d images that need fixing.', 'csf'),
+            'scan_results' => __('Scanned %d images and found %d image that need fixing.', 'csf'),
+            'scan_results_plural' => __('Scanned %d images and found %d images that need fixing.', 'csf'),
             'fix_images' => __('Fix images', 'csf'),
             'error' => __('Error performing action', 'csf'),
             'ok' => __('OK', 'csf'),
@@ -308,13 +310,14 @@ class ColorSpaceFixer {
 
 
     /**
-     * Check if color space should be converted, return true if should be converted, false if not
+     * Check if color space should be converted
      * @param $image
-     * @return bool
+     * @return array
      */
     function check_color_space($image) {
         $colorspace = $image->getImageColorspace();
-        self::debug('Colorspace: ' . $this->get_colorspace_name($colorspace));
+        $colorspace_name = $this->get_colorspace_name($colorspace);
+        self::debug('Colorspace: ' . $colorspace_name);
 
         $profiles = $image->getImageProfiles('*', false);
         $has_ICC_profile = (array_search('icc', $profiles) !== false);
@@ -324,26 +327,46 @@ class ColorSpaceFixer {
 
         if (!$has_ICC_profile) {
             error_log("Color Space Fixer: No icc profile found, can't convert");
-            return false;
+            return [
+                'convert' => false,
+                'colorspace' => $colorspace_name,
+                'icc' => $icc_description,
+            ];
         }
 
         // c2 is the Facebook's tiny sRGB profile https://pippin.gimp.org/sRGBz/ , used by Facebook and some CDNs too
         // eg. Fastly
         if (stripos($icc_description, 'srgb') !== false || $icc_description === 'c2') {
             error_log("Color Space Fixer: Already a sRGB image, no need to convert.");
-            return false;
+            return [
+                'convert' => false,
+                'colorspace' => $colorspace_name,
+                'icc' => $icc_description,
+            ];
         }
 
         if ($colorspace !== Imagick::COLORSPACE_SRGB) {
             $this->debug("Color space is not SRGB (eg. it's a CMYK image). Should be converted.");
-            return true;
+            return [
+                'convert' => true,
+                'colorspace' => $colorspace_name,
+                'icc' => $icc_description,
+            ];
         }
 
         if ($colorspace === Imagick::COLORSPACE_SRGB && stripos($icc_description, 'srgb') === false) {
             self::debug("Color space is sRGB but ICC profile is not (eg. it's a Adobe RGB image). Should be converted.");
-            return true;
+            return [
+                'convert' => true,
+                'colorspace' => $colorspace_name,
+                'icc' => $icc_description,
+            ];
         }
-        return false;
+        return [
+            'convert' => false,
+            'colorspace' => $colorspace_name,
+            'icc' => $icc_description,
+        ];
     }
 
     function csf_admin_menu() {
