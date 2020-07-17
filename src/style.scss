@@ -169,3 +169,31 @@ $color-blue: #1976d2;
 .csf__options-loading {
   opacity: 0.5;
 }
+
+.csf__content-section {
+  margin-bottom: 40px;
+}
+
+.scf__list-item {
+  margin-bottom: 20px;
+  background-color: white;
+  display: flex;
+  padding: 15px;
+}
+
+.scf__list-item-thumbnail {
+  background-color: #D8D8D8;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.scf__list-item-title {
+  margin-bottom: 4px;
+}
+
+.scf__list-item-subtitle {
+  color: rgba(0, 0, 0, 0.5);
+}

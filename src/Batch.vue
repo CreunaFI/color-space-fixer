@@ -17,14 +17,29 @@
             <div class="scf__content-text">{{progressText}}</div>
         </div>
         <div v-if="scanComplete">
-            <h2 class="scf__content-header">{{translations.scan_complete}}</h2>
-            <div class="scf__content-text">{{scanResultsText}}</div>
-            <button class="scf__content-button"
-                    v-on:click="scan"
-                    v-if="this.postsToFix.length > 0"
-            >
-                {{translations.fix_images}}
-            </button>
+            <div class="csf__content-section">
+                <h2 class="scf__content-header">{{translations.scan_complete}}</h2>
+                <div class="scf__content-text">{{scanResultsText}}</div>
+                <button class="scf__content-button"
+                        v-on:click="scan"
+                        v-if="this.postsToFix.length > 0"
+                >
+                    {{translations.fix_images}}
+                </button>
+            </div>
+            <div class="csf__content-section">
+                <h2 class="scf__content-header">{{translations.image_list}}</h2>
+                <div class="scf__list">
+                    <div class="scf__list-item" v-for="post in postsToFix">
+                        <img v-if="post.thumbnail" v-bind:src="post.thumbnail" class="scf__list-item-thumbnail">
+                        <div v-if="!post.thumbnail" class="scf__list-item-thumbnail"></div>
+                        <div>
+                            <div class="scf__list-item-title">{{post.title}}</div>
+                            <div class="scf__list-item-subtitle">{{post.icc}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -41,7 +56,7 @@
                 ids: [],
                 scanning: false,
                 scanComplete: false,
-                total: 10,
+                total: 0,
                 processed: 0,
                 currentIndex: 0,
                 currentId: null,
@@ -107,9 +122,13 @@
                 return this.processed / this.total * 100;
             },
             progressText: function () {
-                return this.processed === 1 ?
-                    sprintf(this.translations.scan_progress, this.progress, this.processed, this.total) :
-                    sprintf(this.translations.scan_progress_plural, this.progress, this.processed, this.total);
+                if (this.total === 0) {
+                    return sprintf(this.translations.scan_progress_short, this.total);
+                } else if (this.processed === 1) {
+                    return sprintf(this.translations.scan_progress, this.progress, this.processed, this.total);
+                } else {
+                    return sprintf(this.translations.scan_progress_plural, this.progress, this.processed, this.total);
+                }
             },
             scanResultsText: function () {
                 return this.postsToFix.length === 1 ?

@@ -293,6 +293,7 @@ class ColorSpaceFixer {
             'save' => __('Save', 'csf'),
             'options_saved' => __('Options have been saved', 'csf'),
             'scanning_in_progress' => __('Scanning media library...', 'csf'),
+            'scan_progress_short' => __('%d%% complete.', 'csf'),
             'scan_progress' => __('%d%% complete. Scanned %d image of %d', 'csf'),
             'scan_progress_plural' => __('%d%% complete. Scanned %d images of %d', 'csf'),
             'scan_complete' => __('Scan complete', 'csf'),
@@ -301,6 +302,7 @@ class ColorSpaceFixer {
             'fix_images' => __('Fix images', 'csf'),
             'error' => __('Error performing action', 'csf'),
             'ok' => __('OK', 'csf'),
+            'image_list' => __('Image list', 'csf'),
         ];
         wp_localize_script('csf-script', 'csf_translations', $strings);
     }
