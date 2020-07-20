@@ -11,6 +11,18 @@ document.addEventListener('DOMContentLoaded', () => {
         duration: 2000,
     })
 
+    Vue.prototype.$errorToast = function (error) {
+        this.$toasted.show(error, {
+            duration: null,
+            action : {
+                text : window.csf_translations.ok,
+                onClick : (e, toastObject) => {
+                    toastObject.goAway(0);
+                }
+            },
+        });
+    };
+
     let element = document.getElementById('color-space-fixer');
     if (element) {
         new Vue({

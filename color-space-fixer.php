@@ -300,7 +300,7 @@ class ColorSpaceFixer {
             'scan_results' => __('Scanned %d images and found %d image that need fixing.', 'csf'),
             'scan_results_plural' => __('Scanned %d images and found %d images that need fixing.', 'csf'),
             'fix_images' => __('Fix images', 'csf'),
-            'error' => __('Error performing action', 'csf'),
+            'generic_error' => __('Error performing action', 'csf'),
             'ok' => __('OK', 'csf'),
             'image_list' => __('Image list', 'csf'),
         ];

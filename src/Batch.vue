@@ -81,15 +81,8 @@
                         }
                     }).catch((error) => {
                         console.error(error)
-                        this.$toasted.show(this.translations.error, {
-                            duration: null,
-                            action : {
-                                text : this.translations.ok,
-                                onClick : (e, toastObject) => {
-                                    toastObject.goAway(0);
-                                }
-                            },
-                        });
+                        this.$errorToast(this.translations.generic_error)
+                        this.scanning = false;
                     })
             },
             getImage(id) {
