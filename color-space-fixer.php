@@ -34,7 +34,7 @@ class ColorSpaceFixer {
 
         $this->options = array_merge($default_options, $db_options);
 
-        add_filter('wp_handle_upload', [$this, 'wp_handle_upload'], 10, 2);
+        add_filter('wp_generate_attachment_metadata', [$this, 'wp_handle_upload'], 5, 2);
         add_action('admin_notices', [$this, 'admin_notices']);
         add_action('wp_ajax_csf_scan_images', [$this, 'ajax_scan_images']);
         add_action('wp_ajax_csf_get_image', [$this, 'ajax_get_image']);
@@ -79,56 +79,77 @@ class ColorSpaceFixer {
         $image->writeImage($path);
     }
 
-    public function wp_handle_upload($array, $var)
+    public function wp_handle_upload($metadata, $attachment_id)
     {
         if ($this->options['process_on_upload'] === false) {
             self::debug('Process on upload turned off, skipping color space fixing');
-            return $array;
+            return $metadata;
         }
 
-        if ($array['type'] !== 'image/jpeg' && $array['type'] !== 'image/png') {
+        if (get_post_mime_type($attachment_id) !== 'image/jpeg' && get_post_mime_type($attachment_id) !== 'image/png') {
             error_log('Color Space Fixer: Not a JPEG or PNG file, skipping color space fixing');
-            return $array;
+            return $metadata;
         }
 
         if (!extension_loaded('imagick')) {
             error_log('Color Space Fixer: Whoops, imagick is not loaded');
-            return $array;
+            return $metadata;
         }
 
         if (extension_loaded('imagick') && !$this->lcms_enabled()) {
             error_log('Color Space Fixer: Whoops, imagick was not built with lcms support');
-            return $array;
+            return $metadata;
         }
 
         try {
-            $path = $array['file'];
+            $path = get_attached_file($attachment_id);
+
+            if (function_exists('wp_get_original_image_path')) {
+                $original = wp_get_original_image_path($attachment_id);
+                if ($original) {
+                    $path = $original;
+                }
+            }
+
             $image = new Imagick($path);
 
             $result = $this->check_color_space($image);
 
             if (!$result['convert']) {
-                return $array;
+                return $metadata;
             }
 
             $this->fix_color_space($image, $path);
 
+            //avoid loop
+            global $color_space_fixer;
+            remove_filter(
+                'wp_generate_attachment_metadata',
+                [$color_space_fixer, 'wp_handle_upload'],
+                10
+            );
+
+            // Regenerate the thumbnails
+            wp_generate_attachment_metadata($attachment_id, $path);
+
+            //update_post_meta($)
+
             //csf_processed=true
 
-            /*$meta = [
+            $meta = [
                 'converted' => true,
                 'error' => false,
                 'original_colorspace' => 'COLORSPACE_CMYK',
                 'original_icc' => 'PSO Uncoated ISO12647 (ECI)',
                 'converted_colorspace' => 'COLORSPACE_RGB',
                 'converted_icc' => 'sRGBv2',
-            ];*/
+            ];
 
         } catch (Exception $e) {
             error_log('Color Space Fixer: Whoops, failed to convert image color space');
         }
 
-        return $array;
+        return $metadata;
     }
 
     /**
