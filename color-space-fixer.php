@@ -80,9 +80,7 @@ class ColorSpaceFixer {
         error_log("Color Space Fixer: Converting to sRGB");
 
         $sRGB_icc = file_get_contents(__DIR__ . '/icc/sRGB2014.icc');
-        $image->setImageRenderingIntent(3);
         $image->profileImage('icc', $sRGB_icc);
-        $image->setImageRenderingIntent(3);
         $image->transformImageColorspace(Imagick::COLORSPACE_RGB);
 
         error_log("Color Space Fixer: Writing image");
