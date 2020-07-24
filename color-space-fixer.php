@@ -370,9 +370,15 @@ class ColorSpaceFixer {
             ];
         }
 
-        // c2 is the Facebook's tiny sRGB profile https://pippin.gimp.org/sRGBz/ , used by Facebook and some CDNs too
-        // eg. Fastly
-        if (stripos($icc_description, 'srgb') !== false || $icc_description === 'c2') {
+        // c2 is the Facebook's tiny sRGB profile https://pippin.gimp.org/sRGBz/ , used by Facebook
+        // and some CDNs too eg. Fastly. uRGB and nRGB are these compact profiles:
+        // https://github.com/saucecontrol/Compact-ICC-Profiles . Since all of these are pretty
+        // much the same as sRGB, there's no need to convert them which would cause generation loss
+        if (stripos($icc_description, 'srgb') !== false ||
+            $icc_description === 'c2' ||
+            $icc_description === 'uRGB' ||
+            $icc_description === 'nRGB'
+        ) {
             error_log("Color Space Fixer: Already a sRGB image, no need to convert.");
             return [
                 'convert' => false,
