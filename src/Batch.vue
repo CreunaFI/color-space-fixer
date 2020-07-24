@@ -27,7 +27,7 @@
                     {{translations.fix_images}}
                 </button>
             </div>
-            <div class="csf__content-section">
+            <div class="csf__content-section" v-if="postsToFix.length">
                 <h2 class="scf__content-header">{{translations.image_list}}</h2>
                 <div class="scf__list">
                     <a class="scf__list-item"
