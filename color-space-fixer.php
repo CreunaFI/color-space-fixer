@@ -28,6 +28,7 @@ class ColorSpaceFixer {
 
         $default_options = [
             'process_on_upload' => true,
+            'show_media_column' => true,
         ];
 
         $db_options = get_option('csf_options') ?: [];
@@ -41,7 +42,15 @@ class ColorSpaceFixer {
         add_action('wp_ajax_csf_save_options', [$this, 'ajax_save_options']);
         add_action('wp_ajax_csf_get_options', [$this, 'ajax_get_options']);
         add_filter('admin_enqueue_scripts', [$this, 'admin_enqueue_scripts']);
-        add_action( 'admin_menu', [$this, 'csf_admin_menu']);
+        add_action('admin_menu', [$this, 'csf_admin_menu']);
+        add_filter('manage_media_columns', [$this, 'add_media_columns']);
+        add_action(
+            'manage_media_custom_column',
+            [$this, 'fill_media_columns'],
+            10,
+            2
+        );
+        add_filter('attachment_fields_to_edit', [$this, 'media_fields'], 10, 2);
 
     }
 
@@ -71,8 +80,10 @@ class ColorSpaceFixer {
         error_log("Color Space Fixer: Converting to sRGB");
 
         $sRGB_icc = file_get_contents(__DIR__ . '/icc/sRGB2014.icc');
+        $image->setImageRenderingIntent(3);
         $image->profileImage('icc', $sRGB_icc);
-        $image->transformImageColorspace(Imagick::COLORSPACE_SRGB);
+        $image->setImageRenderingIntent(3);
+        $image->transformImageColorspace(Imagick::COLORSPACE_RGB);
 
         error_log("Color Space Fixer: Writing image");
 
@@ -115,6 +126,16 @@ class ColorSpaceFixer {
 
             $result = $this->check_color_space($image);
 
+            $meta = [
+                'converted' => false,
+                'original_colorspace' => $result['colorspace'],
+                'original_icc' => $result['icc'],
+                'converted_colorspace' => null,
+                'converted_icc' => null,
+            ];
+
+            update_post_meta($attachment_id, 'csf_data', $meta);
+
             if (!$result['convert']) {
                 return $metadata;
             }
@@ -122,28 +143,20 @@ class ColorSpaceFixer {
             $this->fix_color_space($image, $path);
 
             //avoid loop
-            global $color_space_fixer;
             remove_filter(
                 'wp_generate_attachment_metadata',
-                [$color_space_fixer, 'wp_handle_upload'],
-                10
+                [$this, 'wp_handle_upload'],
+                5
             );
+
+            $meta['converted'] = true;
+            $meta['converted_colorspace'] = 'COLORSPACE_SRGB';
+            $meta['converted_icc'] = 'sRGB2014';
+
+            update_post_meta($attachment_id, 'csf_data', $meta);
 
             // Regenerate the thumbnails
             wp_generate_attachment_metadata($attachment_id, $path);
-
-            //update_post_meta($)
-
-            //csf_processed=true
-
-            $meta = [
-                'converted' => true,
-                'error' => false,
-                'original_colorspace' => 'COLORSPACE_CMYK',
-                'original_icc' => 'PSO Uncoated ISO12647 (ECI)',
-                'converted_colorspace' => 'COLORSPACE_RGB',
-                'converted_icc' => 'sRGBv2',
-            ];
 
         } catch (Exception $e) {
             error_log('Color Space Fixer: Whoops, failed to convert image color space');
@@ -323,7 +336,7 @@ class ColorSpaceFixer {
             'fix_images' => __('Fix images', 'csf'),
             'generic_error' => __('Error performing action', 'csf'),
             'ok' => __('OK', 'csf'),
-            'image_list' => __('Image list', 'csf'),
+            'image_list' => __('List of images', 'csf'),
         ];
         wp_localize_script('csf-script', 'csf_translations', $strings);
     }
@@ -353,7 +366,7 @@ class ColorSpaceFixer {
             return [
                 'convert' => false,
                 'colorspace' => $colorspace_name,
-                'icc' => $icc_description,
+                'icc' => $icc_description ?: null,
             ];
         }
 
@@ -401,6 +414,82 @@ class ColorSpaceFixer {
             [$this, 'render_menu']
         );
     }
+
+    public function add_media_columns($columns)
+    {
+        if ($this->options['show_media_column']) {
+            $columns['csf'] = 'Color Space';
+        }
+        return $columns;
+    }
+
+    function fill_media_columns($column_name, $id)
+    {
+        if (strcmp($column_name, 'csf') === 0) {
+            echo $this->get_info_description($id);
+        }
+    }
+
+    private function simplify_colorspace($colorspace)
+    {
+        if ($colorspace === 'COLORSPACE_CMYK') {
+            return 'CMYK';
+        }
+        if ($colorspace === 'COLORSPACE_RGB' || $colorspace === 'COLORSPACE_SRGB') {
+            return 'RGB';
+        }
+        return $colorspace;
+    }
+
+    private function format_icc($icc)
+    {
+        if (empty($icc)) {
+            return __('Unknown ICC profile');
+        }
+        return $icc;
+    }
+
+    public function media_fields($form_fields, $post) {
+        $post_id = $post->ID;
+        $html = '<div>' . $this->get_info_description($post_id) . '</div>';
+
+        $form_fields['csf'] = [
+            'label' => __('Color Space', 'csf'),
+            'input' => 'html',
+            'html' => $html,
+        ];
+        return $form_fields;
+    }
+
+    /**
+     * @param $id
+     * @return string|void
+     */
+    public function get_info_description($id)
+    {
+        $csf_meta = get_post_meta($id, 'csf_data', true);
+        if (!$csf_meta) {
+            return __('No color space information', 'csf');
+        }
+
+        if ($csf_meta && $csf_meta['converted']) {
+            return sprintf(
+                __('Converted from <strong>%s (%s)</strong> to <strong>%s (%s)</strong>'),
+                $this->format_icc($csf_meta['original_icc']),
+                $this->simplify_colorspace($csf_meta['original_colorspace']),
+                $this->format_icc($csf_meta['converted_icc']),
+                $this->simplify_colorspace($csf_meta['converted_colorspace'])
+            );
+        }
+        if ($csf_meta && !$csf_meta['converted']) {
+            return sprintf(
+                __('%s (%s)'),
+                $this->format_icc($csf_meta['original_icc']),
+                $this->simplify_colorspace($csf_meta['original_colorspace'])
+            );
+        }
+    }
+
 
 }
 

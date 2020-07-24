@@ -7,7 +7,13 @@
                 <span class="scf-custom-checkbox-indicator"></span>
                 Process images on upload
             </label>
-
+        </div>
+        <div class="scf__checkbox">
+            <label class="scf-custom-checkbox">
+                <input type="checkbox" v-model="options.show_media_column">
+                <span class="scf-custom-checkbox-indicator"></span>
+                Show color space information on media list page
+            </label>
         </div>
 
         <button class="scf__content-button"

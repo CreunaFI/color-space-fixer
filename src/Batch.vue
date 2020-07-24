@@ -30,14 +30,18 @@
             <div class="csf__content-section">
                 <h2 class="scf__content-header">{{translations.image_list}}</h2>
                 <div class="scf__list">
-                    <div class="scf__list-item" v-for="post in postsToFix">
+                    <a class="scf__list-item"
+                       v-for="post in postsToFix"
+                       v-bind:href="post.link"
+                       target="_blank"
+                    >
                         <img v-if="post.thumbnail" v-bind:src="post.thumbnail" class="scf__list-item-thumbnail">
                         <div v-if="!post.thumbnail" class="scf__list-item-thumbnail"></div>
                         <div>
                             <div class="scf__list-item-title">{{post.title}}</div>
                             <div class="scf__list-item-subtitle">{{post.icc}}</div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>

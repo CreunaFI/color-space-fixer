@@ -179,6 +179,14 @@ $color-blue: #1976d2;
   background-color: white;
   display: flex;
   padding: 15px;
+  text-decoration: none;
+  color: black;
+  &:hover,
+  &:active,
+  &:focus {
+    text-decoration: none;
+    color: black;
+  }
 }
 
 .scf__list-item-thumbnail {
@@ -196,4 +204,8 @@ $color-blue: #1976d2;
 
 .scf__list-item-subtitle {
   color: rgba(0, 0, 0, 0.5);
+}
+
+.media-modal .compat-field-csf .field {
+  padding-top: 8px;
 }
