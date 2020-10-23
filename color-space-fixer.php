@@ -91,22 +91,22 @@ class ColorSpaceFixer {
     public function wp_handle_upload($metadata, $attachment_id)
     {
         if ($this->options['process_on_upload'] === false) {
-            self::debug('Process on upload turned off, skipping color space fixing');
+            self::debug('Color Space Fixer: Step 2. Process on upload turned off, skipping color space fixing');
             return $metadata;
         }
 
         if (get_post_mime_type($attachment_id) !== 'image/jpeg' && get_post_mime_type($attachment_id) !== 'image/png') {
-            error_log('Color Space Fixer: Not a JPEG or PNG file, skipping color space fixing');
+            error_log('Color Space Fixer: Step 2. Not a JPEG or PNG file, skipping color space fixing');
             return $metadata;
         }
 
         if (!extension_loaded('imagick')) {
-            error_log('Color Space Fixer: Whoops, imagick is not loaded');
+            error_log('Color Space Fixer: Step 2. Whoops, imagick is not loaded');
             return $metadata;
         }
 
         if (extension_loaded('imagick') && !$this->lcms_enabled()) {
-            error_log('Color Space Fixer: Whoops, imagick was not built with lcms support');
+            error_log('Color Space Fixer: Step 2. Whoops, imagick was not built with lcms support');
             return $metadata;
         }
 
@@ -157,7 +157,7 @@ class ColorSpaceFixer {
             wp_generate_attachment_metadata($attachment_id, $path);
 
         } catch (Exception $e) {
-            error_log('Color Space Fixer: Whoops, failed to convert image color space');
+            error_log('Color Space Fixer: Step 2. Whoops, failed to convert image color space');
         }
 
         return $metadata;
@@ -351,13 +351,13 @@ class ColorSpaceFixer {
     function check_color_space($image) {
         $colorspace = $image->getImageColorspace();
         $colorspace_name = $this->get_colorspace_name($colorspace);
-        self::debug('Colorspace: ' . $colorspace_name);
+        self::debug('Color Space Fixer: Colorspace: ' . $colorspace_name);
 
         $profiles = $image->getImageProfiles('*', false);
         $has_ICC_profile = (array_search('icc', $profiles) !== false);
         $icc_description = $image->getImageProperty('icc:description');
 
-        self::debug('icc profile: ' . $icc_description);
+        self::debug('Color Space Fixer: ICC profile: ' . $icc_description);
 
         if (!$has_ICC_profile) {
             error_log("Color Space Fixer: No icc profile found, can't convert");
@@ -386,7 +386,7 @@ class ColorSpaceFixer {
         }
 
         if ($colorspace !== Imagick::COLORSPACE_SRGB) {
-            $this->debug("Color space is not SRGB (eg. it's a CMYK image). Should be converted.");
+            $this->debug("Color Space Fixer: Color space is not SRGB (eg. it's a CMYK image). Should be converted.");
             return [
                 'convert' => true,
                 'colorspace' => $colorspace_name,
@@ -395,7 +395,7 @@ class ColorSpaceFixer {
         }
 
         if ($colorspace === Imagick::COLORSPACE_SRGB && stripos($icc_description, 'srgb') === false) {
-            self::debug("Color space is sRGB but ICC profile is not (eg. it's a Adobe RGB image). Should be converted.");
+            self::debug("Color Space Fixer: Color space is sRGB but ICC profile is not (eg. it's a Adobe RGB image). Should be converted.");
             return [
                 'convert' => true,
                 'colorspace' => $colorspace_name,
