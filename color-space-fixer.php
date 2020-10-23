@@ -35,7 +35,8 @@ class ColorSpaceFixer {
 
         $this->options = array_merge($default_options, $db_options);
 
-        add_filter('wp_generate_attachment_metadata', [$this, 'wp_handle_upload'], 5, 2);
+        add_filter('wp_generate_attachment_metadata', [$this, 'generate_attachment_metadata'], 5, 2);
+        add_filter('wp_handle_upload', [$this, 'handle_upload'], 5, 2);
         add_action('admin_notices', [$this, 'admin_notices']);
         add_action('wp_ajax_csf_scan_images', [$this, 'ajax_scan_images']);
         add_action('wp_ajax_csf_get_image', [$this, 'ajax_get_image']);
@@ -88,8 +89,52 @@ class ColorSpaceFixer {
         $image->writeImage($path);
     }
 
-    public function wp_handle_upload($metadata, $attachment_id)
+    public function handle_upload($array, $var) {
+
+        self::debug("Color Space Fixer: Step 1");
+
+        if ($this->options['process_on_upload'] === false) {
+            self::debug('Color Space Fixer: Step 1. Process on upload turned off, skipping color space fixing');
+            return $array;
+        }
+
+        if ($array['type'] !== 'image/jpeg' && $array['type'] !== 'image/png') {
+            error_log('Color Space Fixer: Step 1. Not a JPEG or PNG file, skipping color space fixing');
+            return $array;
+        }
+
+        if (!extension_loaded('imagick')) {
+            error_log('Color Space Fixer: Step 1. Whoops, imagick is not loaded');
+            return $array;
+        }
+
+        if (extension_loaded('imagick') && !$this->lcms_enabled()) {
+            error_log('Color Space Fixer: Step 1. Whoops, imagick was not built with lcms support');
+            return $array;
+        }
+
+        $path = $array['file'];
+        $image = new Imagick($path);
+
+        $result = $this->check_color_space($image);
+
+        if ($result['convert']) {
+            self::debug(
+                "Color Space Fixer: Step 1. Skipping thumbnail generation in upload so we don't do it twice"
+            );
+            add_filter('intermediate_image_sizes', [$this, 'remove_thumbnail_sizes']);
+        }
+        return $array;
+    }
+
+    public function remove_thumbnail_sizes() {
+        return [];
+    }
+
+    public function generate_attachment_metadata($metadata, $attachment_id)
     {
+        self::debug("Color Space Fixer: Step 2");
+
         if ($this->options['process_on_upload'] === false) {
             self::debug('Color Space Fixer: Step 2. Process on upload turned off, skipping color space fixing');
             return $metadata;
@@ -140,10 +185,13 @@ class ColorSpaceFixer {
 
             $this->fix_color_space($image, $path);
 
-            //avoid loop
+            // Re-add image sizes
+            remove_filter('intermediate_image_sizes', [$this, 'remove_thumbnail_sizes']);
+
+            // Avoid infinite loop
             remove_filter(
                 'wp_generate_attachment_metadata',
-                [$this, 'wp_handle_upload'],
+                [$this, 'generate_attachment_metadata'],
                 5
             );
 
